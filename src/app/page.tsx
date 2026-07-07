@@ -1,3 +1,5 @@
-export default function Home() {
-  return <div>꼬박약</div>;
+import { HomePage } from '@/views/home/ui/HomePage';
+
+export default function Page() {
+  return <HomePage />;
 }
