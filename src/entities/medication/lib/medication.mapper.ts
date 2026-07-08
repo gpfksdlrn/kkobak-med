@@ -1,8 +1,22 @@
 import type { MedicationFormValues } from '../model/medication.schema';
 import type {
+  Medication,
   MedicationInsert,
   MedicationUpdate,
 } from '../model/medication.types';
+
+export function toMedicationFormValues(
+  medication: Medication
+): MedicationFormValues {
+  return {
+    name: medication.name,
+    dosageText: medication.dosage_text ?? '',
+    mealTiming: (medication.meal_timing ??
+      'none') as MedicationFormValues['mealTiming'],
+    startDate: medication.start_date,
+    endDate: medication.end_date ?? '',
+  };
+}
 
 export function toMedicationInsert(
   values: MedicationFormValues
