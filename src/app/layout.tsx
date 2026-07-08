@@ -5,6 +5,8 @@ import { Geist } from 'next/font/google';
 
 import { cn } from '@/shared/lib/utils';
 
+import { Providers } from './Providers';
+
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
@@ -19,7 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" className={cn('font-sans', geist.variable)}>
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
