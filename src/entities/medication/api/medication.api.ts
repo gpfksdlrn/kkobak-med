@@ -20,11 +20,18 @@ export async function fetchMedications() {
   return data;
 }
 
-export async function createMedication(medication: MedicationInsert) {
+export async function createMedication(
+  medication: Omit<MedicationInsert, 'user_id'>
+) {
   const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error('로그인이 필요합니다.');
+
   const { data, error } = await supabase
     .from('medications')
-    .insert(medication)
+    .insert({ ...medication, user_id: user.id })
     .select()
     .single();
 
