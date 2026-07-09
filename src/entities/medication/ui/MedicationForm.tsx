@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
@@ -40,10 +41,18 @@ export function MedicationForm({
     resolver: zodResolver(medicationFormSchema),
     defaultValues: { mealTiming: 'none', ...defaultValues },
   });
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleFormSubmit = async (values: MedicationFormValues) => {
-    await onSubmit(values);
-    if (resetOnSuccess) reset();
+    setSubmitError(null);
+    try {
+      await onSubmit(values);
+      if (resetOnSuccess) reset();
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : '오류가 발생했습니다.'
+      );
+    }
   };
 
   return (
@@ -84,6 +93,8 @@ export function MedicationForm({
         <input id="endDate" type="date" {...register('endDate')} />
         {errors.endDate && <p role="alert">{errors.endDate.message}</p>}
       </div>
+
+      {submitError && <p role="alert">{submitError}</p>}
 
       <button type="submit" disabled={isSubmitting}>
         {submitLabel}

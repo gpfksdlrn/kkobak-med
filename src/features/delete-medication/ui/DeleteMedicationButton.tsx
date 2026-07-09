@@ -11,7 +11,7 @@ export function DeleteMedicationButton({
   medicationId,
   medicationName,
 }: DeleteMedicationButtonProps) {
-  const { mutate, isPending } = useDeleteMedication();
+  const { mutate, isPending, error } = useDeleteMedication();
 
   const handleDelete = () => {
     if (!window.confirm(`'${medicationName}'을(를) 삭제하시겠습니까?`)) return;
@@ -19,8 +19,11 @@ export function DeleteMedicationButton({
   };
 
   return (
-    <button type="button" onClick={handleDelete} disabled={isPending}>
-      삭제
-    </button>
+    <div>
+      <button type="button" onClick={handleDelete} disabled={isPending}>
+        삭제
+      </button>
+      {error && <p role="alert">{error.message}</p>}
+    </div>
   );
 }
