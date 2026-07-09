@@ -11,9 +11,13 @@ import { MedicationForm } from '@/entities/medication/ui/MedicationForm';
 
 type EditMedicationFormProps = {
   medication: Medication;
+  onSuccess?: () => void;
 };
 
-export function EditMedicationForm({ medication }: EditMedicationFormProps) {
+export function EditMedicationForm({
+  medication,
+  onSuccess,
+}: EditMedicationFormProps) {
   const { mutateAsync } = useUpdateMedication();
 
   const handleSubmit = async (values: MedicationFormValues) => {
@@ -21,6 +25,7 @@ export function EditMedicationForm({ medication }: EditMedicationFormProps) {
       id: medication.id,
       medication: toMedicationUpdate(values),
     });
+    onSuccess?.();
   };
 
   return (
