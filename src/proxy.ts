@@ -28,7 +28,23 @@ export async function proxy(request: NextRequest) {
   );
 
   // 토큰 만료 시 세션을 갱신하기 위해 반드시 호출되어야 함
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+
+  if (!user && pathname.startsWith('/medications')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  if (user && pathname === '/login') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
 
   return response;
 }
