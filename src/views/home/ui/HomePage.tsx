@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { createClient } from '@/shared/api/supabase/server';
 import { Button } from '@/shared/ui/button';
+import { TodayChecklist } from '@/widgets/today-checklist/ui/TodayChecklist';
 
 import { SignOutButton } from './SignOutButton';
 
@@ -12,7 +13,7 @@ export async function HomePage() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6">
+    <div className="flex min-h-dvh flex-col items-center gap-4 p-6">
       <h1 className="text-2xl font-semibold">꼬박약</h1>
       {user ? (
         <>
@@ -20,6 +21,9 @@ export async function HomePage() {
             {user.email}로 로그인됨
           </p>
           <SignOutButton />
+          <div className="w-full max-w-md">
+            <TodayChecklist />
+          </div>
         </>
       ) : (
         <>
