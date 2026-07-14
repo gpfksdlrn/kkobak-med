@@ -3,9 +3,18 @@
 import { useState } from 'react';
 
 import { useMedications } from '@/entities/medication/api/useMedications';
+import { useSchedules } from '@/entities/schedule/api/useSchedules';
 import { AddMedicationForm } from '@/features/add-medication/ui/AddMedicationForm';
 import { DeleteMedicationButton } from '@/features/delete-medication/ui/DeleteMedicationButton';
 import { EditMedicationForm } from '@/features/edit-medication/ui/EditMedicationForm';
+
+function MedicationTimes({ medicationId }: { medicationId: string }) {
+  const { data: schedules } = useSchedules(medicationId);
+
+  if (!schedules?.length) return null;
+
+  return <p>{schedules.map(schedule => schedule.time_of_day).join(', ')}</p>;
+}
 
 export function MedicationsPage() {
   const { data: medications, isLoading } = useMedications();
@@ -37,6 +46,7 @@ export function MedicationsPage() {
               ) : (
                 <div className="flex items-center gap-2">
                   <p>{medication.name}</p>
+                  <MedicationTimes medicationId={medication.id} />
                   <button
                     type="button"
                     onClick={() => setEditingId(medication.id)}

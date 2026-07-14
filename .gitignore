@@ -44,3 +44,7 @@ next-env.d.ts
 .omc/
 AGENTS.md
 CLAUDE.md
+/images/
+
+# supabase
+/supabase/.temp/

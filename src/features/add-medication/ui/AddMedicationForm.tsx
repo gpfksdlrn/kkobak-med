@@ -8,8 +8,11 @@ import { MedicationForm } from '@/entities/medication/ui/MedicationForm';
 export function AddMedicationForm() {
   const { mutateAsync } = useCreateMedication();
 
-  const handleSubmit = async (values: MedicationFormValues) => {
-    await mutateAsync(toMedicationInsert(values));
+  const handleSubmit = async (
+    values: MedicationFormValues,
+    times: string[]
+  ) => {
+    await mutateAsync({ medication: toMedicationInsert(values), times });
   };
 
   return (

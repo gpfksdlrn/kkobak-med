@@ -21,13 +21,15 @@ const MEAL_TIMING_OPTIONS: {
 
 type MedicationFormProps = {
   defaultValues?: Partial<MedicationFormValues>;
+  defaultTimes?: string[];
   submitLabel: string;
   resetOnSuccess?: boolean;
-  onSubmit: (values: MedicationFormValues) => Promise<void>;
+  onSubmit: (values: MedicationFormValues, times: string[]) => Promise<void>;
 };
 
 export function MedicationForm({
   defaultValues,
+  defaultTimes,
   submitLabel,
   resetOnSuccess = false,
   onSubmit,
@@ -42,12 +44,29 @@ export function MedicationForm({
     defaultValues: { mealTiming: 'none', ...defaultValues },
   });
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [times, setTimes] = useState<string[]>(defaultTimes ?? ['']);
+  const [timesError, setTimesError] = useState<string | null>(null);
+
+  const addTime = () => setTimes(prev => [...prev, '']);
+  const removeTime = (index: number) =>
+    setTimes(prev => prev.filter((_, i) => i !== index));
+  const updateTime = (index: number, value: string) =>
+    setTimes(prev => prev.map((time, i) => (i === index ? value : time)));
 
   const handleFormSubmit = async (values: MedicationFormValues) => {
+    const validTimes = times.filter(time => time.trim() !== '');
+    if (validTimes.length === 0) {
+      setTimesError('복용 시간을 하나 이상 추가해주세요.');
+      return;
+    }
+    setTimesError(null);
     setSubmitError(null);
     try {
-      await onSubmit(values);
-      if (resetOnSuccess) reset();
+      await onSubmit(values, validTimes);
+      if (resetOnSuccess) {
+        reset();
+        setTimes(['']);
+      }
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : '오류가 발생했습니다.'
@@ -92,6 +111,28 @@ export function MedicationForm({
         <label htmlFor="endDate">종료일 (선택)</label>
         <input id="endDate" type="date" {...register('endDate')} />
         {errors.endDate && <p role="alert">{errors.endDate.message}</p>}
+      </div>
+
+      <div>
+        <span>복용 시간</span>
+        {times.map((time, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <input
+              type="time"
+              value={time}
+              onChange={e => updateTime(index, e.target.value)}
+            />
+            {times.length > 1 && (
+              <button type="button" onClick={() => removeTime(index)}>
+                삭제
+              </button>
+            )}
+          </div>
+        ))}
+        <button type="button" onClick={addTime}>
+          시간 추가
+        </button>
+        {timesError && <p role="alert">{timesError}</p>}
       </div>
 
       {submitError && <p role="alert">{submitError}</p>}
