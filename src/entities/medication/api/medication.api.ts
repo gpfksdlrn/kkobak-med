@@ -1,6 +1,7 @@
 import {
   deleteSchedulesByMedicationId,
   insertSchedules,
+  replaceSchedules,
 } from '@/entities/schedule/api/schedule.api';
 import { createClient } from '@/shared/api/supabase/client';
 
@@ -74,8 +75,7 @@ export async function updateMedication(
 
   if (error) throw error;
 
-  await deleteSchedulesByMedicationId(id);
-  await insertSchedules(toScheduleInserts(id, times));
+  await replaceSchedules(id, times);
 
   return data;
 }
