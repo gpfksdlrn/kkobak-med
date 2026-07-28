@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 
 import { cn } from '@/shared/lib/utils';
+import { BottomNav } from '@/widgets/header/ui/BottomNav';
 
 import { Providers } from './Providers';
 
@@ -22,7 +23,10 @@ export default function RootLayout({
   return (
     <html lang="ko" className={cn('font-sans', geist.variable)}>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="pb-16">{children}</div>
+          <BottomNav />
+        </Providers>
       </body>
     </html>
   );
