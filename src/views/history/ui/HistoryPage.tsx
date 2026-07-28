@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 
 import { formatDate } from '@/shared/lib/formatDate';
@@ -18,10 +17,6 @@ export function HistoryPage() {
 
   return (
     <div className="flex flex-col gap-6 p-4">
-      <Link href="/" className="text-muted-foreground text-sm">
-        홈으로
-      </Link>
-
       <h1 className="text-xl font-semibold">복용 기록</h1>
 
       <div className="flex items-center gap-2">
