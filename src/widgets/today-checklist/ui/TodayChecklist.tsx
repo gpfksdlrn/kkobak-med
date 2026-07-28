@@ -2,10 +2,9 @@
 
 import { useCheckDose } from '@/entities/dose-log/api/useCheckDose';
 import { useDoseLogs } from '@/entities/dose-log/api/useDoseLogs';
-import { type DoseStatus,getStatus } from '@/entities/dose-log/lib/getStatus';
+import { type DoseStatus, getStatus } from '@/entities/dose-log/lib/getStatus';
+import { useActiveMedicationsWithSchedules } from '@/entities/medication/api/useActiveMedicationsWithSchedules';
 import { formatDate } from '@/shared/lib/formatDate';
-
-import { useActiveMedicationsWithSchedules } from '../api/useActiveMedicationsWithSchedules';
 
 const STATUS_LABEL: Record<DoseStatus, string> = {
   taken: '복용 완료',
