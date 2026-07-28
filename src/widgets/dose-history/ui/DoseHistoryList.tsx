@@ -1,10 +1,6 @@
-'use client';
-
-import { useCheckDose } from '@/entities/dose-log/api/useCheckDose';
 import { useDoseLogs } from '@/entities/dose-log/api/useDoseLogs';
 import { type DoseStatus, getStatus } from '@/entities/dose-log/lib/getStatus';
 import { useActiveMedicationsWithSchedules } from '@/entities/medication/api/useActiveMedicationsWithSchedules';
-import { formatDate } from '@/shared/lib/formatDate';
 
 const STATUS_LABEL: Record<DoseStatus, string> = {
   taken: '복용 완료',
@@ -12,12 +8,10 @@ const STATUS_LABEL: Record<DoseStatus, string> = {
   pending: '예정',
 };
 
-export function TodayChecklist() {
-  const today = formatDate(new Date());
+export function DoseHistoryList({ date }: { date: string }) {
   const { data: medications, isLoading: isMedicationsLoading } =
-    useActiveMedicationsWithSchedules(today);
-  const { data: doseLogs, isLoading: isDoseLogsLoading } = useDoseLogs(today);
-  const { mutate: checkDose } = useCheckDose(today);
+    useActiveMedicationsWithSchedules(date);
+  const { data: doseLogs, isLoading: isDoseLogsLoading } = useDoseLogs(date);
 
   if (isMedicationsLoading || isDoseLogsLoading) return <p>불러오는 중...</p>;
 
@@ -30,7 +24,7 @@ export function TodayChecklist() {
           medicationName: medication.name,
           schedule,
           status: getStatus(
-            today,
+            date,
             schedule.time_of_day,
             doseLog?.taken_at ?? null
           ),
@@ -42,7 +36,7 @@ export function TodayChecklist() {
     );
 
   if (items.length === 0) {
-    return <p>오늘 복용할 약이 없습니다.</p>;
+    return <p>해당 날짜에 복용할 약이 없습니다.</p>;
   }
 
   return (
@@ -52,11 +46,6 @@ export function TodayChecklist() {
           <span>{item.schedule.time_of_day.slice(0, 5)}</span>
           <span>{item.medicationName}</span>
           <span>{STATUS_LABEL[item.status]}</span>
-          {item.status !== 'taken' && (
-            <button type="button" onClick={() => checkDose(item.schedule.id)}>
-              복용 체크
-            </button>
-          )}
         </li>
       ))}
     </ul>
