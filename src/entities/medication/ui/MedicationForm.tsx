@@ -19,6 +19,14 @@ const MEAL_TIMING_OPTIONS: {
   { value: 'none', label: '상관없음' },
 ];
 
+const TIME_PRESETS: { label: string; value: string }[] = [
+  { label: '기상직후', value: '07:00' },
+  { label: '아침', value: '08:00' },
+  { label: '점심', value: '12:30' },
+  { label: '저녁', value: '19:00' },
+  { label: '취침전', value: '22:00' },
+];
+
 type MedicationFormProps = {
   defaultValues?: Partial<MedicationFormValues>;
   defaultTimes?: string[];
@@ -52,6 +60,12 @@ export function MedicationForm({
     setTimes(prev => prev.filter((_, i) => i !== index));
   const updateTime = (index: number, value: string) =>
     setTimes(prev => prev.map((time, i) => (i === index ? value : time)));
+  const applyPreset = (value: string) =>
+    setTimes(prev => {
+      if (prev.includes(value)) return prev;
+      if (prev.length === 1 && prev[0] === '') return [value];
+      return [...prev, value];
+    });
 
   const handleFormSubmit = async (values: MedicationFormValues) => {
     const validTimes = times.filter(time => time.trim() !== '');
@@ -115,6 +129,17 @@ export function MedicationForm({
 
       <div>
         <span>복용 시간</span>
+        <div className="flex flex-wrap gap-2">
+          {TIME_PRESETS.map(preset => (
+            <button
+              key={preset.value}
+              type="button"
+              onClick={() => applyPreset(preset.value)}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
         {times.map((time, index) => (
           <div key={index} className="flex items-center gap-2">
             <input
