@@ -27,6 +27,14 @@ const TIME_PRESETS: { label: string; value: string }[] = [
   { label: '취침전', value: '22:00' },
 ];
 
+function sortTimes(times: string[]) {
+  return [...times].sort((a, b) => {
+    if (a === '') return 1;
+    if (b === '') return -1;
+    return a.localeCompare(b);
+  });
+}
+
 type MedicationFormProps = {
   defaultValues?: Partial<MedicationFormValues>;
   defaultTimes?: string[];
@@ -52,10 +60,12 @@ export function MedicationForm({
     defaultValues: { mealTiming: 'none', ...defaultValues },
   });
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [times, setTimes] = useState<string[]>(defaultTimes ?? ['']);
+  const [times, setTimes] = useState<string[]>(
+    sortTimes(defaultTimes ?? [''])
+  );
   const [timesError, setTimesError] = useState<string | null>(null);
 
-  const addTime = () => setTimes(prev => [...prev, '']);
+  const addTime = () => setTimes(prev => sortTimes([...prev, '']));
   const removeTime = (index: number) =>
     setTimes(prev => prev.filter((_, i) => i !== index));
   const updateTime = (index: number, value: string) =>
@@ -65,7 +75,7 @@ export function MedicationForm({
       const isDuplicate = prev.some(time => time.slice(0, 5) === value);
       if (isDuplicate) return prev;
       if (prev.length === 1 && prev[0] === '') return [value];
-      return [...prev, value];
+      return sortTimes([...prev, value]);
     });
 
   const handleFormSubmit = async (values: MedicationFormValues) => {
