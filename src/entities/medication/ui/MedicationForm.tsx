@@ -62,7 +62,8 @@ export function MedicationForm({
     setTimes(prev => prev.map((time, i) => (i === index ? value : time)));
   const applyPreset = (value: string) =>
     setTimes(prev => {
-      if (prev.includes(value)) return prev;
+      const isDuplicate = prev.some(time => time.slice(0, 5) === value);
+      if (isDuplicate) return prev;
       if (prev.length === 1 && prev[0] === '') return [value];
       return [...prev, value];
     });
