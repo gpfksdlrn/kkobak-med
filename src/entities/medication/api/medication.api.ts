@@ -12,6 +12,7 @@ import type {
 
 export const medicationKeys = {
   all: ['medications'] as const,
+  detail: (id: string) => ['medications', id] as const,
   activeWithSchedules: (date: string) =>
     ['medications', 'active-with-schedules', date] as const,
 };
@@ -29,6 +30,18 @@ export async function fetchMedications() {
     .from('medications')
     .select('*')
     .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchMedicationById(id: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('medications')
+    .select('*')
+    .eq('id', id)
+    .single();
 
   if (error) throw error;
   return data;
