@@ -1,5 +1,7 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
+
 import { useUpdateMedication } from '@/entities/medication/api/useUpdateMedication';
 import {
   toMedicationFormValues,
@@ -34,7 +36,13 @@ export function EditMedicationForm({
     onSuccess?.();
   };
 
-  if (isLoading) return <p>불러오는 중...</p>;
+  if (isLoading)
+    return (
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-12 text-sm">
+        <Loader2 className="size-4 animate-spin" />
+        불러오는 중...
+      </div>
+    );
 
   return (
     <MedicationForm

@@ -1,8 +1,23 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, Plus, X } from 'lucide-react';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+
+import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Input } from '@/shared/ui/input';
+import { Label } from '@/shared/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/select';
+import { Separator } from '@/shared/ui/separator';
 
 import {
   medicationFormSchema,
@@ -52,6 +67,7 @@ export function MedicationForm({
 }: MedicationFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -60,9 +76,7 @@ export function MedicationForm({
     defaultValues: { mealTiming: 'none', ...defaultValues },
   });
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [times, setTimes] = useState<string[]>(
-    sortTimes(defaultTimes ?? [''])
-  );
+  const [times, setTimes] = useState<string[]>(sortTimes(defaultTimes ?? ['']));
   const [timesError, setTimesError] = useState<string | null>(null);
 
   const addTime = () => setTimes(prev => sortTimes([...prev, '']));
@@ -102,80 +116,172 @@ export function MedicationForm({
   return (
     <form
       onSubmit={handleSubmit(handleFormSubmit)}
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-5"
     >
-      <div>
-        <label htmlFor="name">약 이름</label>
-        <input id="name" {...register('name')} />
-        {errors.name && <p role="alert">{errors.name.message}</p>}
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="name">약 이름</Label>
+        <Input
+          id="name"
+          placeholder="예: 타이레놀"
+          aria-invalid={!!errors.name}
+          {...register('name')}
+        />
+        {errors.name && (
+          <p role="alert" className="text-destructive text-sm">
+            {errors.name.message}
+          </p>
+        )}
       </div>
 
-      <div>
-        <label htmlFor="dosageText">복용량</label>
-        <input id="dosageText" {...register('dosageText')} />
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="dosageText">복용량</Label>
+        <Input
+          id="dosageText"
+          placeholder="예: 1정"
+          {...register('dosageText')}
+        />
       </div>
 
-      <div>
-        <label htmlFor="mealTiming">복용 시점</label>
-        <select id="mealTiming" {...register('mealTiming')}>
-          {MEAL_TIMING_OPTIONS.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label htmlFor="startDate">시작일</label>
-        <input id="startDate" type="date" {...register('startDate')} />
-        {errors.startDate && <p role="alert">{errors.startDate.message}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="endDate">종료일 (선택)</label>
-        <input id="endDate" type="date" {...register('endDate')} />
-        {errors.endDate && <p role="alert">{errors.endDate.message}</p>}
-      </div>
-
-      <div>
-        <span>복용 시간</span>
-        <div className="flex flex-wrap gap-2">
-          {TIME_PRESETS.map(preset => (
-            <button
-              key={preset.value}
-              type="button"
-              onClick={() => applyPreset(preset.value)}
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="mealTiming">복용 시점</Label>
+        <Controller
+          control={control}
+          name="mealTiming"
+          render={({ field }) => (
+            <Select
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={field.disabled}
             >
-              {preset.label}
-            </button>
-          ))}
-        </div>
-        {times.map((time, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <input
-              type="time"
-              value={time}
-              onChange={e => updateTime(index, e.target.value)}
-            />
-            {times.length > 1 && (
-              <button type="button" onClick={() => removeTime(index)}>
-                삭제
-              </button>
-            )}
-          </div>
-        ))}
-        <button type="button" onClick={addTime}>
-          시간 추가
-        </button>
-        {timesError && <p role="alert">{timesError}</p>}
+              <SelectTrigger id="mealTiming" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {MEAL_TIMING_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
-      {submitError && <p role="alert">{submitError}</p>}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="startDate">시작일</Label>
+          <Input
+            id="startDate"
+            type="date"
+            aria-invalid={!!errors.startDate}
+            {...register('startDate')}
+          />
+          {errors.startDate && (
+            <p role="alert" className="text-destructive text-sm">
+              {errors.startDate.message}
+            </p>
+          )}
+        </div>
 
-      <button type="submit" disabled={isSubmitting}>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="endDate">종료일 (선택)</Label>
+          <Input
+            id="endDate"
+            type="date"
+            aria-invalid={!!errors.endDate}
+            {...register('endDate')}
+          />
+          {errors.endDate && (
+            <p role="alert" className="text-destructive text-sm">
+              {errors.endDate.message}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle>복용 시간</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-1.5">
+            {TIME_PRESETS.map(preset => (
+              <Button
+                key={preset.value}
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={() => applyPreset(preset.value)}
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
+
+          <div className="flex flex-col">
+            {times.map((time, index) => (
+              <div key={index}>
+                {index > 0 && <Separator className="my-2" />}
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="time"
+                    value={time}
+                    onChange={e => updateTime(index, e.target.value)}
+                    className="flex-1"
+                  />
+                  {times.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="시간 삭제"
+                      onClick={() => removeTime(index)}
+                    >
+                      <X />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={addTime}
+            className="w-full"
+          >
+            <Plus data-icon="inline-start" />
+            시간 추가
+          </Button>
+
+          {timesError && (
+            <p role="alert" className="text-destructive text-sm">
+              {timesError}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {submitError && (
+        <p role="alert" className="text-destructive text-sm">
+          {submitError}
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        size="lg"
+        className={cn('w-full', isSubmitting && 'opacity-80')}
+      >
+        {isSubmitting && (
+          <Loader2 data-icon="inline-start" className="animate-spin" />
+        )}
         {submitLabel}
-      </button>
+      </Button>
     </form>
   );
 }
