@@ -25,15 +25,13 @@ const STATUS_ICON: Record<DoseStatus, typeof CheckCircle2> = {
 };
 
 const STATUS_ICON_STYLE: Record<DoseStatus, string> = {
-  taken:
-    'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400',
+  taken: 'bg-success/15 text-success',
   missed: 'bg-destructive/10 text-destructive',
   pending: 'bg-muted text-muted-foreground',
 };
 
 const STATUS_BADGE_STYLE: Record<DoseStatus, string> = {
-  taken:
-    'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400',
+  taken: 'bg-success/15 text-success',
   missed: 'bg-destructive/10 text-destructive',
   pending: 'bg-muted text-muted-foreground',
 };
