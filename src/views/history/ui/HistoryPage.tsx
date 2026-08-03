@@ -1,9 +1,11 @@
 'use client';
 
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 import { formatDate } from '@/shared/lib/formatDate';
 import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
 import { DoseHistoryList } from '@/widgets/dose-history/ui/DoseHistoryList';
 
 function addDays(date: string, amount: number) {
@@ -16,27 +18,31 @@ export function HistoryPage() {
   const [date, setDate] = useState(() => formatDate(new Date()));
 
   return (
-    <div className="flex flex-col gap-6 p-4">
-      <h1 className="text-xl font-semibold">복용 기록</h1>
+    <div className="mx-auto flex max-w-md flex-col gap-5 p-4">
+      <h1 className="text-xl font-semibold tracking-tight">복용 기록</h1>
 
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
+          size="icon"
+          aria-label="이전 날"
           onClick={() => setDate(prev => addDays(prev, -1))}
         >
-          이전 날
+          <ChevronLeft />
         </Button>
-        <input
+        <Input
           type="date"
           value={date}
           onChange={event => setDate(event.target.value)}
-          className="rounded border px-2 py-1"
+          className="flex-1 text-center"
         />
         <Button
           variant="outline"
+          size="icon"
+          aria-label="다음 날"
           onClick={() => setDate(prev => addDays(prev, 1))}
         >
-          다음 날
+          <ChevronRight />
         </Button>
       </div>
 
