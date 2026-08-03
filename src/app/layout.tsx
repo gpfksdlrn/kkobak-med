@@ -24,8 +24,10 @@ export default function RootLayout({
     <html lang="ko" className={cn('font-sans', geist.variable)}>
       <body>
         <Providers>
-          <div className="pb-16">{children}</div>
-          <BottomNav />
+          <div className="flex min-h-dvh flex-col">
+            <main className="flex-1 pb-16">{children}</main>
+            <BottomNav />
+          </div>
         </Providers>
       </body>
     </html>

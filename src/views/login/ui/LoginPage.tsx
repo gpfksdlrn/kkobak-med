@@ -38,7 +38,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-8 p-6">
+    <div className="flex h-full flex-col items-center justify-center gap-8 p-6">
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-3xl font-bold tracking-tight">꼬박약</h1>
         <p className="text-muted-foreground text-sm">

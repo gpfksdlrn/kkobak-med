@@ -13,7 +13,7 @@ export async function HomePage() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
+    <div className="mx-auto flex h-full w-full max-w-md flex-col gap-6 p-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">꼬박약</h1>
         {user && <SignOutButton />}
