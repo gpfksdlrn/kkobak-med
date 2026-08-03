@@ -13,25 +13,30 @@ export async function HomePage() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="flex min-h-dvh flex-col items-center gap-4 p-6">
-      <h1 className="text-2xl font-semibold">꼬박약</h1>
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 p-6">
+      <header className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">꼬박약</h1>
+        {user && <SignOutButton />}
+      </header>
+
       {user ? (
         <>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground -mt-4 text-sm">
             {user.email}로 로그인됨
           </p>
-          <SignOutButton />
-          <div className="w-full max-w-md">
+
+          <section className="flex flex-col gap-3">
+            <h2 className="text-sm font-medium">오늘의 복약</h2>
             <TodayChecklist />
-          </div>
+          </section>
         </>
       ) : (
-        <>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <p className="text-muted-foreground text-sm">로그인이 필요합니다</p>
           <Button nativeButton={false} render={<Link href="/login" />}>
             로그인하러 가기
           </Button>
-        </>
+        </div>
       )}
     </div>
   );
