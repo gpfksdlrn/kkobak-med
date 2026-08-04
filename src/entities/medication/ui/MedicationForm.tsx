@@ -42,6 +42,14 @@ const TIME_PRESETS: { label: string; value: string }[] = [
   { label: '취침전', value: '22:00' },
 ];
 
+function formatPresetTime(value: string) {
+  const [hourStr, minute] = value.split(':');
+  const hour = Number(hourStr);
+  const period = hour < 12 ? '오전' : '오후';
+  const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+  return `${period} ${String(displayHour).padStart(2, '0')}:${minute}`;
+}
+
 function sortTimes(times: string[]) {
   return [...times].sort((a, b) => {
     if (a === '') return 1;
@@ -76,24 +84,52 @@ export function MedicationForm({
     defaultValues: { mealTiming: 'none', ...defaultValues },
   });
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [times, setTimes] = useState<string[]>(sortTimes(defaultTimes ?? ['']));
+  const normalizedDefaultTimes = (defaultTimes ?? []).map(time =>
+    time.slice(0, 5)
+  );
+  const [selectedPresets, setSelectedPresets] = useState<string[]>(() =>
+    sortTimes(
+      normalizedDefaultTimes.filter(time =>
+        TIME_PRESETS.some(preset => preset.value === time)
+      )
+    )
+  );
+  const [customTimes, setCustomTimes] = useState<string[]>(() =>
+    sortTimes(
+      normalizedDefaultTimes.filter(
+        time => !TIME_PRESETS.some(preset => preset.value === time)
+      )
+    )
+  );
   const [timesError, setTimesError] = useState<string | null>(null);
+  const [showManualTimes, setShowManualTimes] = useState(
+    () => customTimes.length > 0
+  );
 
-  const addTime = () => setTimes(prev => sortTimes([...prev, '']));
-  const removeTime = (index: number) =>
-    setTimes(prev => prev.filter((_, i) => i !== index));
-  const updateTime = (index: number, value: string) =>
-    setTimes(prev => prev.map((time, i) => (i === index ? value : time)));
-  const applyPreset = (value: string) =>
-    setTimes(prev => {
-      const isDuplicate = prev.some(time => time.slice(0, 5) === value);
-      if (isDuplicate) return prev;
-      if (prev.length === 1 && prev[0] === '') return [value];
-      return sortTimes([...prev, value]);
-    });
+  const addCustomTime = () =>
+    setCustomTimes(prev => sortTimes([...prev, '']));
+  const removeCustomTime = (index: number) =>
+    setCustomTimes(prev => prev.filter((_, i) => i !== index));
+  const updateCustomTime = (index: number, value: string) =>
+    setCustomTimes(prev => prev.map((time, i) => (i === index ? value : time)));
+  const openManualTimes = () => {
+    setShowManualTimes(true);
+    if (customTimes.length === 0) addCustomTime();
+  };
+  const togglePreset = (value: string) =>
+    setSelectedPresets(prev =>
+      prev.includes(value)
+        ? prev.filter(time => time !== value)
+        : sortTimes([...prev, value])
+    );
 
   const handleFormSubmit = async (values: MedicationFormValues) => {
-    const validTimes = times.filter(time => time.trim() !== '');
+    const validTimes = sortTimes([
+      ...new Set([
+        ...selectedPresets,
+        ...customTimes.filter(time => time.trim() !== ''),
+      ]),
+    ]);
     if (validTimes.length === 0) {
       setTimesError('복용 시간을 하나 이상 추가해주세요.');
       return;
@@ -104,7 +140,9 @@ export function MedicationForm({
       await onSubmit(values, validTimes);
       if (resetOnSuccess) {
         reset();
-        setTimes(['']);
+        setSelectedPresets([]);
+        setCustomTimes([]);
+        setShowManualTimes(false);
       }
     } catch (error) {
       setSubmitError(
@@ -154,7 +192,12 @@ export function MedicationForm({
               disabled={field.disabled}
             >
               <SelectTrigger id="mealTiming" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {(value: MedicationFormValues['mealTiming']) =>
+                    MEAL_TIMING_OPTIONS.find(option => option.value === value)
+                      ?.label
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {MEAL_TIMING_OPTIONS.map(option => (
@@ -205,57 +248,94 @@ export function MedicationForm({
           <CardTitle>복용 시간</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-1.5">
-            {TIME_PRESETS.map(preset => (
+          <div className="grid grid-cols-2 gap-2.5">
+            {TIME_PRESETS.map(preset => {
+              const isSelected = selectedPresets.includes(preset.value);
+
+              return (
+                <Button
+                  key={preset.value}
+                  type="button"
+                  variant="outline"
+                  onClick={() => togglePreset(preset.value)}
+                  className={cn(
+                    'h-auto min-h-12 w-full rounded-2xl border-2 py-3 text-sm font-medium whitespace-normal',
+                    isSelected
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border text-foreground hover:bg-muted'
+                  )}
+                >
+                  {preset.label}
+                  <span className="block text-xs font-normal opacity-80">
+                    ({formatPresetTime(preset.value)})
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
+
+          {showManualTimes ? (
+            <>
+              <div className="flex flex-col">
+                {customTimes.map((time, index) => {
+                  const isDuplicatePreset =
+                    time !== '' && selectedPresets.includes(time);
+
+                  return (
+                    <div key={index}>
+                      {index > 0 && <Separator className="my-2" />}
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="time"
+                          value={time}
+                          onChange={e =>
+                            updateCustomTime(index, e.target.value)
+                          }
+                          aria-invalid={isDuplicatePreset}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="시간 삭제"
+                          onClick={() => removeCustomTime(index)}
+                        >
+                          <X />
+                        </Button>
+                      </div>
+                      {isDuplicatePreset && (
+                        <p className="text-destructive mt-1 text-xs">
+                          프리셋과 시간이 겹쳐요. 하나만 저장돼요.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
               <Button
-                key={preset.value}
                 type="button"
                 variant="outline"
-                size="sm"
-                className="rounded-full"
-                onClick={() => applyPreset(preset.value)}
+                onClick={addCustomTime}
+                className="w-full"
               >
-                {preset.label}
+                <Plus data-icon="inline-start" />
+                시간 추가
               </Button>
-            ))}
-          </div>
-
-          <div className="flex flex-col">
-            {times.map((time, index) => (
-              <div key={index}>
-                {index > 0 && <Separator className="my-2" />}
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="time"
-                    value={time}
-                    onChange={e => updateTime(index, e.target.value)}
-                    className="flex-1"
-                  />
-                  {times.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="시간 삭제"
-                      onClick={() => removeTime(index)}
-                    >
-                      <X />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={addTime}
-            className="w-full"
-          >
-            <Plus data-icon="inline-start" />
-            시간 추가
-          </Button>
+            </>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={openManualTimes}
+              className="text-muted-foreground w-fit self-start"
+            >
+              <Plus data-icon="inline-start" />
+              직접 입력
+            </Button>
+          )}
 
           {timesError && (
             <p role="alert" className="text-destructive text-sm">
